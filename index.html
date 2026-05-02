@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Master HTML Converter</title>
+
+  <!-- Bibliothèques PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root{
+      --bg-1:#0f172a;
+      --bg-2:#111827;
+      --card:#ffffff;
+      --muted:#64748b;
+      --text:#0f172a;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --accent:#06b6d4;
+      --success:#10b981;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --border:#e5e7eb;
+      --shadow:0 20px 40px rgba(2, 6, 23, .15);
+      --radius:20px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.20), transparent 30%),
+        radial-gradient(circle at top right, rgba(6,182,212,.18), transparent 25%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color:#fff;
+      padding:24px;
+    }
+
+    .app{
+      max-width:1400px;
+      margin:0 auto;
+    }
+
+    .header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:58px;
+      height:58px;
+      border-radius:18px;
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      box-shadow:0 10px 25px rgba(37,99,235,.35);
+    }
+
+    .title h1{
+      font-size:28px;
+      line-height:1.1;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .title p{
+      color:rgba(255,255,255,.72);
+      font-size:14px;
+      margin-top:6px;
+    }
+
+    .status-badge{
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      color:#dbeafe;
+      font-size:13px;
+      backdrop-filter: blur(10px);
+    }
+
+    .main-grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:24px;
+    }
+
+    .panel{
+      background:rgba(255,255,255,.95);
+      color:var(--text);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-head{
+      padding:20px 22px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+
+    .panel-head h2{
+      font-size:18px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .panel-head p{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .panel-body{
+      padding:20px;
+    }
+
+    .form-grid{
+      display:grid;
+      gap:16px;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:700;
+      color:#334155;
+    }
+
+    textarea, select, input[type="number"], input[type="text"]{
+      width:100%;
+      border:1px solid var(--border);
+      background:#fff;
+      color:#0f172a;
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:14px;
+      outline:none;
+      transition:.2s ease;
+    }
+
+    textarea{
+      min-height:300px;
+      resize:vertical;
+      line-height:1.5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    textarea:focus, select:focus, input:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+
+    .row-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .row-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    .toggle-wrap{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f8fafc;
+      font-size:13px;
+      color:#334155;
+    }
+
+    .actions{
+      display:grid;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      color:#fff;
+      box-shadow:0 12px 24px rgba(37,99,235,.25);
+    }
+
+    .btn-success{
+      background:linear-gradient(135deg, #059669, #10b981);
+      color:#fff;
+      box-shadow:0 12px 24px rgba(16,185,129,.25);
+    }
+
+    .btn-light{
+      background:#f8fafc;
+      color:#0f172a;
+      border:1px solid var(--border);
+    }
+
+    .btn-warning{
+      background:linear-gradient(135deg, #d97706, #f59e0b);
+      color:#fff;
+      box-shadow:0 12px 24px rgba(245,158,11,.24);
+    }
+
+    .helper{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .preview-panel{
+      min-height:760px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .preview-toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 20px;
+      border-bottom:1px solid var(--border);
+      background:#f8fafc;
+    }
+
+    .preview-meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .preview-tag{
+      padding:8px 12px;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:999px;
+      color:#334155;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .preview-container{
+      padding:20px;
+      background:
+        linear-gradient(180deg, #eef2ff, #f8fafc);
+      flex:1;
+      overflow:auto;
+    }
+
+    .preview-paper-wrap{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      min-height:100%;
+    }
+
+    .preview-paper{
+      background:#fff;
+      color:#111827;
+      box-shadow:0 18px 40px rgba(15, 23, 42, .18);
+      border-radius:8px;
+      overflow:hidden;
+      transition:.25s ease;
+      position:relative;
+    }
+
+    .preview-content{
+      width:100%;
+      height:100%;
+      padding:20px;
+      overflow:auto;
+      background:#fff;
+    }
+
+    .placeholder{
+      min-height:500px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:12px;
+      color:#64748b;
+      text-align:center;
+      padding:30px;
+    }
+
+    .placeholder .big{
+      font-size:44px;
+    }
+
+    .footer-note{
+      margin-top:16px;
+      font-size:12px;
+      color:rgba(255,255,255,.75);
+      text-align:center;
+    }
+
+    .message{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:13px;
+      display:none;
+    }
+
+    .message.show{
+      display:block;
+    }
+
+    .message.error{
+      background:rgba(239,68,68,.12);
+      color:#991b1b;
+      border:1px solid rgba(239,68,68,.25);
+    }
+
+    .message.success{
+      background:rgba(16,185,129,.12);
+      color:#065f46;
+      border:1px solid rgba(16,185,129,.25);
+    }
+
+    .security-note{
+      margin-top:8px;
+      padding:12px;
+      border-radius:14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    @media (max-width: 1100px){
+      .main-grid{
+        grid-template-columns:1fr;
+      }
+      .preview-panel{
+        min-height:620px;
+      }
+    }
+
+    @media (max-width: 700px){
+      body{
+        padding:14px;
+      }
+      .row-2, .row-3{
+        grid-template-columns:1fr;
+      }
+      .title h1{
+        font-size:23px;
+      }
+      .logo{
+        width:52px;
+        height:52px;
+        font-size:24px;
+      }
+      textarea{
+        min-height:240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">📄</div>
+        <div class="title">
+          <h1>Master HTML Converter</h1>
+          <p>Convertissez du code HTML en PDF avec aperçu, réglages avancés et export propre.</p>
+        </div>
+      </div>
+      <div class="status-badge">Mode local • HTML → PDF</div>
+    </div>
+
+    <div class="main-grid">
+      <!-- Colonne gauche -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Paramètres de conversion</h2>
+          <p>Collez votre code HTML, configurez le document puis exportez-le en PDF.</p>
+        </div>
+
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="htmlInput">Code HTML à convertir</label>
+              <textarea id="htmlInput" placeholder="Collez ici votre code HTML...">
+<div style="font-family: Arial, sans-serif; padding: 20px;">
+  <h1 style="color:#2563eb;">Bonjour depuis Master HTML Converter</h1>
+  <p>Ce contenu HTML peut être prévisualisé puis exporté en PDF.</p>
+  <ul>
+    <li>Conversion propre</li>
+    <li>Choix du format</li>
+    <li>Orientation personnalisée</li>
+  </ul>
+</div>
+              </textarea>
+              <div class="helper">
+                Astuce : utilisez du HTML simple et propre pour obtenir un meilleur rendu PDF.
+              </div>
+              <div class="security-note">
+                Sécurité : cette prévisualisation injecte votre HTML dans l’aperçu. Évitez de coller du code non fiable. Les scripts seront supprimés automatiquement avant affichage.
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="fileName">Nom du fichier PDF</label>
+                <input type="text" id="fileName" value="master-html-converter.pdf" />
+              </div>
+
+              <div class="field">
+                <label for="pdfFormat">Format PDF</label>
+                <select id="pdfFormat">
+                  <option value="a4">A4</option>
+                  <option value="a3">A3</option>
+                  <option value="a5">A5</option>
+                  <option value="letter">Letter</option>
+                  <option value="legal">Legal</option>
+                  <option value="tabloid">Tabloid</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="orientation">Orientation</label>
+                <select id="orientation">
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Paysage</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="pageMode">Type de pagination</label>
+                <select id="pageMode">
+                  <option value="multi">Pages multiples</option>
+                  <option value="single">Page longue unique</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="imageQuality">Qualité image</label>
+                <select id="imageQuality">
+                  <option value="1">Standard</option>
+                  <option value="1.5">Élevée</option>
+                  <option value="2" selected>Très élevée</option>
+                  <option value="3">Maximale</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="pageBreakMode">Gestion des coupures</label>
+                <select id="pageBreakMode">
+                  <option value="css">CSS auto</option>
+                  <option value="legacy">Legacy</option>
+                  <option value="avoid-all">Éviter au maximum</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Marges (en mm)</label>
+              <div class="row-2">
+                <input type="number" id="marginTop" min="0" value="10" placeholder="Haut" />
+                <input type="number" id="marginBottom" min="0" value="10" placeholder="Bas" />
+              </div>
+              <div class="row-2" style="margin-top:12px;">
+                <input type="number" id="marginLeft" min="0" value="10" placeholder="Gauche" />
+                <input type="number" id="marginRight" min="0" value="10" placeholder="Droite" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Options utiles</label>
+              <div class="toggle-wrap">
+                <div class="chip">Aperçu en direct</div>
+                <div class="chip">Suppression des scripts</div>
+                <div class="chip">Nom de fichier personnalisable</div>
+                <div class="chip">Compatible mobile</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-primary" id="previewBtn">👁️ Prévisualiser</button>
+              <button class="btn btn-success" id="downloadBtn">⬇️ Télécharger le PDF</button>
+              <button class="btn btn-light" id="clearBtn">🧹 Effacer le contenu</button>
+              <button class="btn btn-warning" id="sampleBtn">✨ Charger un exemple</button>
+            </div>
+
+            <div id="messageBox" class="message"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Colonne droite -->
+      <section class="panel preview-panel">
+        <div class="panel-head">
+          <h2>Aperçu du document</h2>
+          <p>Vérifiez le rendu avant de lancer le téléchargement du PDF.</p>
+        </div>
+
+        <div class="preview-toolbar">
+          <div class="preview-meta">
+            <div class="preview-tag" id="metaFormat">Format: A4</div>
+            <div class="preview-tag" id="metaOrientation">Orientation: Portrait</div>
+            <div class="preview-tag" id="metaMode">Mode: Pages multiples</div>
+          </div>
+          <div class="preview-tag">Master HTML Converter</div>
+        </div>
+
+        <div class="preview-container">
+          <div class="preview-paper-wrap">
+            <div class="preview-paper" id="previewPaper">
+              <div class="preview-content" id="previewContent">
+                <div class="placeholder">
+                  <div class="big">🖥️</div>
+                  <strong>Aucun aperçu généré</strong>
+                  <span>Collez votre HTML puis cliquez sur <b>Prévisualiser</b>.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer-note">
+      Master HTML Converter • Interface élégante HTML/CSS/JavaScript • Export PDF
+    </div>
+  </div>
+
+  <script>
+    const htmlInput = document.getElementById('htmlInput');
+    const previewBtn = document.getElementById('previewBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const sampleBtn = document.getElementById('sampleBtn');
+
+    const pdfFormat = document.getElementById('pdfFormat');
+    const orientation = document.getElementById('orientation');
+    const pageMode = document.getElementById('pageMode');
+    const imageQuality = document.getElementById('imageQuality');
+    const pageBreakMode = document.getElementById('pageBreakMode');
+    const fileName = document.getElementById('fileName');
+
+    const marginTop = document.getElementById('marginTop');
+    const marginBottom = document.getElementById('marginBottom');
+    const marginLeft = document.getElementById('marginLeft');
+    const marginRight = document.getElementById('marginRight');
+
+    const previewContent = document.getElementById('previewContent');
+    const previewPaper = document.getElementById('previewPaper');
+    const messageBox = document.getElementById('messageBox');
+
+    const metaFormat = document.getElementById('metaFormat');
+    const metaOrientation = document.getElementById('metaOrientation');
+    const metaMode = document.getElementById('metaMode');
+
+    const pageSizes = {
+      a3: { portrait: [1123, 1587], landscape: [1587, 1123] },
+      a4: { portrait: [794, 1123], landscape: [1123, 794] },
+      a5: { portrait: [559, 794], landscape: [794, 559] },
+      letter: { portrait: [816, 1056], landscape: [1056, 816] },
+      legal: { portrait: [816, 1344], landscape: [1344, 816] },
+      tabloid: { portrait: [1056, 1632], landscape: [1632, 1056] }
+    };
+
+    function showMessage(text, type = 'success') {
+      messageBox.className = 'message show ' + type;
+      messageBox.textContent = text;
+      setTimeout(() => {
+        messageBox.className = 'message';
+        messageBox.textContent = '';
+      }, 4000);
+    }
+
+    function sanitizeHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Supprimer scripts
+      doc.querySelectorAll('script').forEach(el => el.remove());
+
+      // Supprimer attributs on*
+      doc.querySelectorAll('*').forEach(el => {
+        [...el.attributes].forEach(attr => {
+          if (/^on/i.test(attr.name)) {
+            el.removeAttribute(attr.name);
+          }
+        });
+      });
+
+      return doc.body.innerHTML;
+    }
+
+    function updateMeta() {
+      metaFormat.textContent = 'Format: ' + pdfFormat.value.toUpperCase();
+      metaOrientation.textContent = 'Orientation: ' + (orientation.value === 'portrait' ? 'Portrait' : 'Paysage');
+      metaMode.textContent = 'Mode: ' + (pageMode.value === 'multi' ? 'Pages multiples' : 'Page longue unique');
+    }
+
+    function updatePreviewSize() {
+      const format = pdfFormat.value;
+      const orient = orientation.value;
+      const mode = pageMode.value;
+
+      const size = pageSizes[format][orient];
+      const width = size[0];
+      const height = size[1];
+
+      if (mode === 'single') {
+        previewPaper.style.width = Math.min(width, 950) + 'px';
+        previewPaper.style.minHeight = '500px';
+        previewPaper.style.height = 'auto';
+      } else {
+        previewPaper.style.width = Math.min(width, 950) + 'px';
+        previewPaper.style.height = Math.min(height, 1350) + 'px';
+      }
+    }
+
+    function renderPreview() {
+      const rawHtml = htmlInput.value.trim();
+
+      if (!rawHtml) {
+        previewContent.innerHTML = `
+          <div class="placeholder">
+            <div class="big">🖥️</div>
+            <strong>Aucun aperçu généré</strong>
+            <span>Collez votre HTML puis cliquez sur <b>Prévisualiser</b>.</span>
+          </div>
+        `;
+        showMessage('Veuillez coller du code HTML avant la prévisualisation.', 'error');
+        return;
+      }
+
+      const safeHtml = sanitizeHTML(rawHtml);
+      previewContent.innerHTML = safeHtml;
+      updateMeta();
+      updatePreviewSize();
+      showMessage('Aperçu généré avec succès.', 'success');
+    }
+
+    function getMargins() {
+      return [
+        Number(marginTop.value || 0),
+        Number(marginLeft.value || 0),
+        Number(marginBottom.value || 0),
+        Number(marginRight.value || 0)
+      ];
+    }
+
+    function getPageBreakConfig() {
+      const mode = pageBreakMode.value;
+
+      if (mode === 'avoid-all') {
+        return { mode: ['avoid-all', 'css', 'legacy'] };
+      }
+      if (mode === 'legacy') {
+        return { mode: ['legacy'] };
+      }
+      return { mode: ['css', 'legacy'] };
+    }
+
+    async function downloadPDF() {
+      const rawHtml = htmlInput.value.trim();
+
+      if (!rawHtml) {
+        showMessage('Veuillez coller du code HTML avant le téléchargement.', 'error');
+        return;
+      }
+
+      renderPreview();
+
+      let outputName = fileName.value.trim() || 'master-html-converter.pdf';
+      if (!outputName.toLowerCase().endsWith('.pdf')) {
+        outputName += '.pdf';
+      }
+
+      const scale = Number(imageQuality.value || 2);
+      const margins = getMargins();
+      const selectedFormat = pdfFormat.value;
+      const selectedOrientation = orientation.value;
+      const selectedMode = pageMode.value;
+
+      const exportElement = document.createElement('div');
+      exportElement.style.background = '#ffffff';
+      exportElement.style.color = '#111827';
+      exportElement.style.width = '100%';
+      exportElement.style.padding = '0';
+      exportElement.innerHTML = sanitizeHTML(rawHtml);
+
+      if (selectedMode === 'single') {
+        exportElement.style.minHeight = 'auto';
+      }
+
+      document.body.appendChild(exportElement);
+      exportElement.style.position = 'fixed';
+      exportElement.style.left = '-100000px';
+      exportElement.style.top = '0';
+
+      try {
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = '⏳ Génération en cours...';
+
+        const options = {
+          margin: margins,
+          filename: outputName,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: scale,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: selectedFormat,
+            orientation: selectedOrientation
+          },
+          pagebreak: getPageBreakConfig()
+        };
+
+        if (selectedMode === 'single') {
+          options.pagebreak = { mode: [] };
+        }
+
+        await html2pdf().set(options).from(exportElement).save();
+        showMessage('PDF téléchargé avec succès.', 'success');
+      } catch (error) {
+        console.error(error);
+        showMessage('Une erreur est survenue pendant la génération du PDF.', 'error');
+      } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = '⬇️ Télécharger le PDF';
+        exportElement.remove();
+      }
+    }
+
+    function clearAll() {
+      htmlInput.value = '';
+      previewContent.innerHTML = `
+        <div class="placeholder">
+          <div class="big">🖥️</div>
+          <strong>Aucun aperçu généré</strong>
+          <span>Collez votre HTML puis cliquez sur <b>Prévisualiser</b>.</span>
+        </div>
+      `;
+      showMessage('Contenu effacé.', 'success');
+    }
+
+    function loadSample() {
+      htmlInput.value = `
+<div style="font-family: Arial, sans-serif; padding: 30px; color: #1e293b;">
+  <div style="text-align:center; margin-bottom: 25px;">
+    <h1 style="margin:0; color:#2563eb;">Master HTML Converter</h1>
+    <p style="margin-top:8px; color:#64748b;">Exemple de document HTML exportable en PDF</p>
+  </div>
+
+  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px; margin-bottom:20px;">
+    <h2 style="margin-top:0;">Résumé</h2>
+    <p>Ce bloc montre comment afficher un contenu bien structuré dans l'aperçu avant conversion en PDF.</p>
+  </div>
+
+  <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+    <thead>
+      <tr style="background:#2563eb; color:white;">
+        <th style="padding:12px; border:1px solid #cbd5e1;">Élément</th>
+        <th style="padding:12px; border:1px solid #cbd5e1;">Description</th>
+        <th style="padding:12px; border:1px solid #cbd5e1;">Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:12px; border:1px solid #cbd5e1;">HTML</td>
+        <td style="padding:12px; border:1px solid #cbd5e1;">Code source collé par l'utilisateur</td>
+        <td style="padding:12px; border:1px solid #cbd5e1; color:green;">OK</td>
+      </tr>
+      <tr>
+        <td style="padding:12px; border:1px solid #cbd5e1;">Aperçu</td>
+        <td style="padding:12px; border:1px solid #cbd5e1;">Prévisualisation avant export</td>
+        <td style="padding:12px; border:1px solid #cbd5e1; color:green;">OK</td>
+      </tr>
+      <tr>
+        <td style="padding:12px; border:1px solid #cbd5e1;">PDF</td>
+        <td style="padding:12px; border:1px solid #cbd5e1;">Téléchargement en un clic</td>
+        <td style="padding:12px; border:1px solid #cbd5e1; color:green;">OK</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="padding:16px; border-left:4px solid #06b6d4; background:#ecfeff;">
+    <strong>Note :</strong> Vous pouvez remplacer ce contenu par votre propre code HTML.
+  </div>
+</div>
+      `.trim();
+
+      renderPreview();
+      showMessage('Exemple chargé.', 'success');
+    }
+
+    previewBtn.addEventListener('click', renderPreview);
+    downloadBtn.addEventListener('click', downloadPDF);
+    clearBtn.addEventListener('click', clearAll);
+    sampleBtn.addEventListener('click', loadSample);
+
+    [pdfFormat, orientation, pageMode].forEach(el => {
+      el.addEventListener('change', () => {
+        updateMeta();
+        updatePreviewSize();
+      });
+    });
+
+    // Initialisation
+    updateMeta();
+    updatePreviewSize();
+    renderPreview();
+  </script>
+</body>
+</html>
+
